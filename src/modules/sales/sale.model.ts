@@ -27,12 +27,11 @@ const SaleSchema: Schema = new Schema({
 }, { timestamps: true });
 
 // Auto-generate invoiceNo before saving
-SaleSchema.pre('save', async function (next) {
+SaleSchema.pre('save', async function () {
   if (this.isNew && !this.invoiceNo) {
     const count = await mongoose.model('Sale').countDocuments();
     this.invoiceNo = `INV-${String(count + 1).padStart(3, '0')}`;
   }
-  next();
 });
 
 export const Sale = mongoose.model<ISale>('Sale', SaleSchema);
