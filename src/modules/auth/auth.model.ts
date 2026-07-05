@@ -1,17 +1,31 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 export interface IUser extends Document {
   name: string;
   email: string;
-  password?: string;
+  password: string;
   role: 'Admin' | 'Manager' | 'Employee';
+  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 const UserSchema: Schema = new Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String }, // Optional since previous auth might be social or just plain token based
+  name: { type: String, required: true, trim: true },
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  password: { type: String, required: true, minlength: 6 },
   role: { type: String, enum: ['Admin', 'Manager', 'Employee'], default: 'Employee' },
 }, { timestamps: true });
+
+// Hash password before save
+UserSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password as string, salt);
+});
+
+// Compare password method
+UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
+  return bcrypt.compare(candidatePassword, this.password);
+};
 
 export const User = mongoose.model<IUser>('User', UserSchema);

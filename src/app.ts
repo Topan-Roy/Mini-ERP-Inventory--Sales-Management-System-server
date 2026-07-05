@@ -1,34 +1,41 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 
 const app = express();
 
 // Middlewares
 app.use(cors({
-  origin: process.env.CLIENT_URL || "*",
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
   credentials: true,
 }));
 app.use(express.json());
 
-import { AuthRoutes } from './modules/auth/auth.routes';
-import { ProductRoutes } from './modules/products/product.routes';
-import { SaleRoutes } from './modules/sales/sale.routes';
-import { DashboardRoutes } from './modules/dashboard/dashboard.routes';
-import path from 'path';
-
 // Serve uploads static folder
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+import { AuthRoutes } from './modules/auth/auth.routes';
+import { ProductRoutes } from './modules/products/product.routes';
+import { CustomerRoutes } from './modules/customers/customer.routes';
+import { SaleRoutes } from './modules/sales/sale.routes';
+import { DashboardRoutes } from './modules/dashboard/dashboard.routes';
+
 // Base Route
-app.get("/", (req, res) => {
-  res.send("Mini-ERP Backend is running on port 5000!");
+app.get('/', (req, res) => {
+  res.send('Mini-ERP Backend is running on port 5000!');
 });
 
 // Mount Routes
 app.use('/api/auth', AuthRoutes);
 app.use('/api/products', ProductRoutes);
+app.use('/api/customers', CustomerRoutes);
 app.use('/api/sales', SaleRoutes);
 app.use('/api/dashboard', DashboardRoutes);
+
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
+});
 
 // Global Error Handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

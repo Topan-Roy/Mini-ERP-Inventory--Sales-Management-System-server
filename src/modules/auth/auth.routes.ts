@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import { login } from './auth.controller';
+import { register, login, getMe } from './auth.controller';
+import { verifyToken } from '../../middlewares/auth';
 
 const router = Router();
 
+router.post('/register', register);
 router.post('/login', login);
-// Re-implementing /jwt endpoint for backwards compatibility if needed
-router.post('/jwt', login);
+router.get('/me', verifyToken, getMe);
 
 export const AuthRoutes = router;
