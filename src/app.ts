@@ -6,7 +6,11 @@ const app = express();
 
 // Middlewares
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000', 
+    'https://mini-erp-inventory-sales-management.vercel.app',
+    process.env.CLIENT_URL
+  ].filter(Boolean) as string[],
   credentials: true,
 }));
 app.use(express.json());
