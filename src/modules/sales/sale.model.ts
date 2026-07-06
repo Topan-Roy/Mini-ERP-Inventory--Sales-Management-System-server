@@ -15,7 +15,7 @@ export interface ISale extends Document {
 }
 
 const SaleSchema: Schema = new Schema({
-  invoiceNo: { type: String, unique: true },
+  invoiceNo: { type: String, unique: true, index: true },
   customer: { type: Schema.Types.ObjectId, ref: 'Customer', default: null },
   items: [{
     product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
@@ -25,13 +25,5 @@ const SaleSchema: Schema = new Schema({
   totalAmount: { type: Number, required: true },
   soldBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 }, { timestamps: true });
-
-// Auto-generate invoiceNo before saving
-SaleSchema.pre('save', async function () {
-  if (this.isNew && !this.invoiceNo) {
-    const count = await mongoose.model('Sale').countDocuments();
-    this.invoiceNo = `INV-${String(count + 1).padStart(3, '0')}`;
-  }
-});
 
 export const Sale = mongoose.model<ISale>('Sale', SaleSchema);

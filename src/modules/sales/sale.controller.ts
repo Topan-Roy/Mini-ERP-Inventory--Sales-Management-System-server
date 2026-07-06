@@ -54,6 +54,11 @@ export const createSale = async (req: AuthRequest, res: Response) => {
       saleData.customer = customerId;
     }
 
+    // Generate invoiceNo manually because Sale.create() with a session array
+    // does NOT trigger the pre('save') hook, leaving invoiceNo undefined.
+    const count = await Sale.countDocuments().session(session);
+    saleData.invoiceNo = `INV-${String(count + 1).padStart(3, '0')}`;
+
     const sale = await Sale.create([saleData], { session });
 
     await session.commitTransaction();
